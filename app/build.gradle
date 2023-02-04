@@ -9,13 +9,16 @@ repositories {
     }
 }
 
+def localProperties = new Properties()
+localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.example.mapsindoorsgettingstartedkotlin"
-        minSdkVersion 24
+        minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -27,6 +30,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            resValue("string", "google_maps_key", localProperties.getProperty("google_maps_api"))
+            resValue("string", "maps_indoors_key", localProperties.getProperty("maps_indoors_api"))
         }
     }
     compileOptions {
@@ -53,4 +60,6 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    implementation 'com.mapspeople.mapsindoors:mapsindoorssdk:3.13.15'
 }

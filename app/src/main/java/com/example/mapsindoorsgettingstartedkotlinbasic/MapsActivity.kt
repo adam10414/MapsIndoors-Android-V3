@@ -36,6 +36,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback{
     private var mpDirectionsRenderer: MPDirectionsRenderer? = null
     private var mpRoutingProvider: MPRoutingProvider? = null
 
+    private val googleMapsKey = R.string.google_maps_key
+    private val mapsIndoorsKey = R.string.maps_indoors_key
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
