@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+//    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+
 }
 
 repositories {
@@ -27,14 +29,16 @@ android {
     }
 
     buildTypes {
-        release {
-            minifyEnabled false
+        debug {
+            resValue("string", "google_maps_key", localProperties["google_maps_api"])
+            resValue("string", "maps_indoors_key", localProperties["maps_indoors_api"])
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
-        debug {
-            resValue("string", "google_maps_key", localProperties.getProperty("google_maps_api"))
-            resValue("string", "maps_indoors_key", localProperties.getProperty("maps_indoors_api"))
-        }
+
+//        release {
+//            minifyEnabled false
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+//        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

@@ -9,16 +9,14 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.textfield.TextInputEditText
-import com.mapsindoors.mapssdk.MPDirectionsRenderer
-import com.mapsindoors.mapssdk.MPRoutingProvider
-import com.mapsindoors.mapssdk.MapControl
-import com.mapsindoors.mapssdk.Point
+import com.mapsindoors.mapssdk.*
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback{
@@ -36,9 +34,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback{
     private var mpDirectionsRenderer: MPDirectionsRenderer? = null
     private var mpRoutingProvider: MPRoutingProvider? = null
 
-    private val googleMapsKey = R.string.google_maps_key
-    private val mapsIndoorsKey = R.string.maps_indoors_key
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,6 +44,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback{
         mapFragment.getMapAsync(this)
 
         //TODO: Instantiate MapsIndoors and assign mMapView from MapFragment
+        val mapsIndoorsKey = resources.getString(R.string.maps_indoors_key)
+        val googleMapsKey = resources.getString(R.string.google_maps_key)
+
+        MapsIndoors.initialize(applicationContext, mapsIndoorsKey)
+        MapsIndoors.setGoogleAPIKey(googleMapsKey)
+
+        mapFragment.view?.let {
+            mapView = it
+        }
 
         mSearchTxtField = findViewById(R.id.search_edit_txt)
         //Listener for when the user searches through the keyboard
@@ -110,11 +114,28 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback{
         mMap = googleMap
 
         mapView?.let { view ->
-            //TODO: Init MapControl here
+            initMapControl(view)
         }
     }
 
     //TODO: Implement methods when described in the tutorial.
+    private fun initMapControl(view: View) {
+        //Creates a new instance of MapControl
+        mMapControl = MapControl(this)
+        //Sets the Google map object and the map view to the MapControl
+        mMapControl.setGoogleMap(mMap, view)
+        mMapControl.init { miError ->
+            if (miError == null) {
+                //No errors so getting the first venue.
+                val venue = MapsIndoors.getVenues()?.currentVenue
+
+                runOnUiThread{
+                    //Animates the camera to fit the venu
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(venue?.latLngBoundingBox, 19))
+                }
+            }
+        }
+    }
 
     fun addFragmentToBottomSheet(newFragment: Fragment) {
         if (mCurrentFragment != null) {
