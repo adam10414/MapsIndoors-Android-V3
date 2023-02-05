@@ -9,7 +9,10 @@ import com.mapsindoors.mapssdk.LocationDisplayRule
 import com.mapsindoors.mapssdk.MPLocation
 
 
-internal class SearchItemAdapter(private val mLocations: List<MPLocation?>, private val mMapActivity: MapsActivity?) : RecyclerView.Adapter<ViewHolder>() {
+internal class SearchItemAdapter(
+    private val mLocations: List<MPLocation?>,
+    private val mMapActivity: MapsActivity?
+) : RecyclerView.Adapter<ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context), parent)
@@ -17,6 +20,32 @@ internal class SearchItemAdapter(private val mLocations: List<MPLocation?>, priv
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         //TODO: Implement the locations list ui
+        holder.text.text = mLocations[position]?.name
+
+        if (mMapActivity != null) {
+            val locationDisplayRule: LocationDisplayRule? =
+                mMapActivity.getMapControl().getDisplayRule(mLocations[position])
+
+            if (locationDisplayRule != null && locationDisplayRule.icon != null){
+                mMapActivity.runOnUiThread( Runnable {
+                    holder.imageView.setImageBitmap(
+                        locationDisplayRule.icon
+                    )
+                })
+            } else {
+                //Location does not have a special displayRule using type Display rule
+                val typeDisplayRule: LocationDisplayRule? = mMapActivity.getMapControl().getDisplayRule(mLocations[position]?.type)
+
+                if (typeDisplayRule != null){
+                    mMapActivity.runOnUiThread(Runnable {
+                        holder.imageView.setImageBitmap(
+                            typeDisplayRule.icon
+                        )
+                    })
+                }
+            }
+
+        }
     }
 
     override fun getItemCount(): Int {

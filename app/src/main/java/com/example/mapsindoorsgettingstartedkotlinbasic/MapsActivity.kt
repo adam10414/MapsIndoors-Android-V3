@@ -17,6 +17,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.textfield.TextInputEditText
 import com.mapsindoors.mapssdk.*
+import com.mapsindoors.mapssdk.errors.MIError
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback{
@@ -43,7 +44,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback{
                 .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        //TODO: Instantiate MapsIndoors and assign mMapView from MapFragment
+        //Initiates MapsIndoors.
         val mapsIndoorsKey = resources.getString(R.string.maps_indoors_key)
         val googleMapsKey = resources.getString(R.string.google_maps_key)
 
@@ -62,6 +63,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback{
             if (i == EditorInfo.IME_ACTION_DONE || i == EditorInfo.IME_ACTION_SEARCH) {
                 if (textView.text.isNotEmpty()) {
                     //TODO: Call the search method when you have created it following the tutorial
+                    search(mSearchTxtField.text.toString())
                 }
                 //Making sure keyboard is closed.
                 imm.hideSoftInputFromWindow(textView.windowToken, 0)
@@ -77,6 +79,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback{
             if (mSearchTxtField.text?.length != 0) {
                 //There is text inside the search field. So lets do the search.
                 //TODO: Call the search method when you have created it following the tutorial
+                search(mSearchTxtField.text.toString())
             }
             //Making sure keyboard is closed.
             imm.hideSoftInputFromWindow(it.windowToken, 0)
@@ -135,6 +138,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback{
                 }
             }
         }
+    }
+
+    private fun search(searchQuery: String){
+        val mpQuery = MPQuery.Builder().setQuery(searchQuery).build()
+        val mpFilter = MPFilter.Builder().setTake(30).build()
+
+        //Query the locations
+        MapsIndoors.getLocationsAsync(mpQuery, mpFilter) {list: List<MPLocation?>?, miError: MIError? ->
+
+            //Ensuring there is no error and the list is not empty.
+            if (miError == null && !list.isNullOrEmpty()) {
+                //Creating a new instance of the search fragment.
+                mSearchFragment = SearchFragment.newInstance(list, this)
+                //Make a transaction to the bottom sheet.
+                addFragmentToBottomSheet(mSearchFragment)
+                //Clear the search text since we got a result.
+                mSearchTxtField.text?.clear()
+            }
+        }
+    }
+
+    fun getMapControl(): MapControl {
+        return mMapControl
     }
 
     fun addFragmentToBottomSheet(newFragment: Fragment) {
