@@ -149,6 +149,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback{
 
             //Ensuring there is no error and the list is not empty.
             if (miError == null && !list.isNullOrEmpty()) {
+                runOnUiThread {
+                    mMapControl.displaySearchResults(list, true)
+                }
                 //Creating a new instance of the search fragment.
                 mSearchFragment = SearchFragment.newInstance(list, this)
                 //Make a transaction to the bottom sheet.
