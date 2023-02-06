@@ -17,6 +17,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.textfield.TextInputEditText
+import com.mapsindoors.livesdk.LiveDataDomainTypes
 import com.mapsindoors.mapssdk.*
 import com.mapsindoors.mapssdk.errors.MIError
 
@@ -122,10 +123,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnRouteResultListe
         }
     }
 
-    //TODO: Implement methods when described in the tutorial.
     private fun initMapControl(view: View) {
         //Creates a new instance of MapControl
         mMapControl = MapControl(this)
+        enableLiveData()
         //Sets the Google map object and the map view to the MapControl
         mMapControl.setGoogleMap(mMap, view)
         mMapControl.init { miError ->
@@ -139,6 +140,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnRouteResultListe
                 }
             }
         }
+    }
+
+    private fun enableLiveData() {
+        mMapControl.enableLiveData(LiveDataDomainTypes.AVAILABILITY_DOMAIN)
+        mMapControl.enableLiveData(LiveDataDomainTypes.OCCUPANCY_DOMAIN)
+        mMapControl.enableLiveData(LiveDataDomainTypes.POSITION_DOMAIN)
     }
 
     private fun search(searchQuery: String){
