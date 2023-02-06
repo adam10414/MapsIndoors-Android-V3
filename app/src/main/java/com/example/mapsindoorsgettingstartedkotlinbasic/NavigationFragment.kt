@@ -14,6 +14,7 @@ import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.mapsindoors.mapssdk.Route
 import java.util.concurrent.TimeUnit
+import kotlin.math.floor
 
 class NavigationFragment : Fragment() {
     private var mRoute: Route? = null
@@ -33,7 +34,11 @@ class NavigationFragment : Fragment() {
         mViewPager.registerOnPageChangeCallback(object : OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                //TODO: Add logic to switch between legs of the route
+                //When a page is selected, call the renderer with the index
+                mMapsActivity?.getMpDirectionsRenderer()?.setRouteLegIndex(position)
+                mMapsActivity?.getMpDirectionsRenderer()?.currentFloor?.let {floorIndex ->
+                    mMapsActivity?.getMapControl()?.selectFloor(floorIndex)
+                }
             }
         })
 
@@ -46,7 +51,8 @@ class NavigationFragment : Fragment() {
 
         //Button for closing the bottom sheet. Clears the route through directionsRenderer as well, and changes map padding.
         closeBtn.setOnClickListener {
-            //TODO: Add logic to remove the route on the map and removing this fragment.
+            mMapsActivity!!.removeFragmentFromBottomSheet(this)
+            mMapsActivity!!.getMpDirectionsRenderer()?.clear()
         }
 
         //Next button for going through the legs of the route.
@@ -65,7 +71,12 @@ class NavigationFragment : Fragment() {
             )
         }
 
-        //TODO: Add text to distanceTxtView and infoTxtView as shown in the tutorial.
+        //Distance in meters
+        distanceTxtView.text = "Distance: " + mRoute?.distance.toString() + "m"
+        //ETA for route in minutes
+        infoTxtView.text = "Time for route: " + mRoute?.duration?.toLong()?.let {duration ->
+            TimeUnit.MINUTES.convert(duration, TimeUnit.SECONDS).toString() + "minutes"
+        }
     }
 
     inner class RouteCollectionAdapter(fragment: Fragment?) :

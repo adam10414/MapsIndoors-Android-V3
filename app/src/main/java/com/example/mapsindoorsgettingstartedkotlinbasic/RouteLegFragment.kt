@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.annotation.Nullable
 import androidx.fragment.app.Fragment
 import com.mapsindoors.mapssdk.RouteLeg
+import java.sql.SQLSyntaxErrorException
 
 class RouteLegFragment : Fragment() {
     private var mRouteLeg: RouteLeg? = null
@@ -24,6 +25,12 @@ class RouteLegFragment : Fragment() {
         val stepsTxtView = view.findViewById<TextView>(R.id.steps_text_view)
         var stepsString = ""
         //TODO: Create a string to describe the steps.
+        for (i in mRouteLeg!!.steps.indices) {
+            val routeStep = mRouteLeg!!.steps[i]
+            stepsString += """
+                Step ${i +1}: ${routeStep.maneuver}${System.lineSeparator()}
+            """.trimIndent()
+        }
         stepsTxtView.text = stepsString
     }
 

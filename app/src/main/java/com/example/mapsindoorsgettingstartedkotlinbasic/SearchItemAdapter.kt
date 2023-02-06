@@ -21,6 +21,11 @@ internal class SearchItemAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         //TODO: Implement the locations list ui
         holder.text.text = mLocations[position]?.name
+        holder.itemView.setOnClickListener {
+            mLocations[position]?.let {locations -> mMapActivity?.createRoute(locations)
+                mMapActivity?.getMapControl()?.clearMap()
+            }
+        }
 
         if (mMapActivity != null) {
             val locationDisplayRule: LocationDisplayRule? =

@@ -9,6 +9,7 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.annotation.Nullable
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -20,7 +21,7 @@ import com.mapsindoors.mapssdk.*
 import com.mapsindoors.mapssdk.errors.MIError
 
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback{
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnRouteResultListener{
 
     private lateinit var mMap: GoogleMap
     private lateinit var mapView: View
@@ -160,6 +161,44 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback{
                 mSearchTxtField.text?.clear()
             }
         }
+    }
+
+    override fun onRouteResult(@Nullable route: Route?, @Nullable miError: MIError?) {
+        if (mpDirectionsRenderer == null) {
+            mpDirectionsRenderer = MPDirectionsRenderer(this, mMap, mMapControl, OnLegSelectedListener { i: Int ->
+                mpDirectionsRenderer?.setRouteLegIndex(i)
+                mMapControl.selectFloor(mpDirectionsRenderer!!.currentFloor)
+            })
+        }
+
+        //Setting the route on the Directions renderer
+        mpDirectionsRenderer?.setRoute(route!!)
+
+        //New instance of nav fragment
+        mNavigationFragment = NavigationFragment.newInstance(route, this)
+
+        //Starting a transaction and assigning it to the bottom sheet
+        addFragmentToBottomSheet(mNavigationFragment)
+
+        //since camera movement is involved, we're running this on the UI thread.
+        runOnUiThread{
+            mpDirectionsRenderer?.initMap(true)
+        }
+    }
+
+    fun createRoute(mpLocation: MPLocation) {
+        if (mpRoutingProvider == null) {
+            mpRoutingProvider = MPRoutingProvider()
+            mpRoutingProvider?.setOnRouteResultListener(this)
+
+        }
+
+        mpRoutingProvider?.setTravelMode(TravelMode.WALKING)
+        mpRoutingProvider?.query(mUserLocation, mpLocation.point)
+    }
+
+    fun getMpDirectionsRenderer(): MPDirectionsRenderer? {
+        return mpDirectionsRenderer
     }
 
     fun getMapControl(): MapControl {
